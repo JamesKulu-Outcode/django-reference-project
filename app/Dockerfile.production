@@ -1,0 +1,85 @@
+# Dockerfile for production
+
+
+###########
+# BUILDER #
+###########
+
+FROM python:3.9-slim as builder
+
+# set work directory
+WORKDIR /usr/src/app
+
+# set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# install psycopg2 dependencies
+RUN apt-get update \
+    && apt-get install -y libpq-dev gcc
+
+# lint
+RUN pip install --upgrade pip
+# RUN pip install flake8
+# COPY . .
+# RUN flake8 --ignore=E501,F401 .
+
+# install dependencies
+# COPY requirements.txt .
+COPY requirements .
+RUN pip wheel --no-cache-dir --no-deps --wheel-dir /usr/src/app/wheels -r production.txt
+
+# remove build dependencies
+RUN apt-get autoremove -y gcc
+
+
+#########
+# FINAL #
+#########
+
+FROM python:3.9-slim
+
+RUN mkdir -p /home/app
+
+# create app user
+RUN groupadd --system app && useradd --system --gid app app
+
+# create appropriate directories
+ENV HOME=/home/app
+ENV APP_HOME=/home/app/web
+RUN mkdir $APP_HOME
+RUN mkdir $APP_HOME/static_cdn
+RUN mkdir $APP_HOME/media
+WORKDIR $APP_HOME
+
+# install dependencies
+# install psycopg2 dependencies
+RUN apt-get update \
+    && apt-get install -y libpangocairo-1.0-0 fonts-deva netcat libpq-dev gettext
+
+COPY --from=builder /usr/src/app/wheels /wheels
+# COPY --from=builder /usr/src/app/requirements.txt ./
+COPY --from=builder /usr/src/app/production.txt ./
+RUN pip install --no-cache /wheels/*
+
+# copy project files to app home directory
+COPY . $APP_HOME
+RUN chown -R app:app $APP_HOME
+RUN touch $APP_HOME/debug.log
+RUN chown -R app:app $APP_HOME/debug.log
+
+# copy entrypoint.prod.sh
+COPY ./entrypoint.prod.sh $APP_HOME/
+RUN chmod +x ./entrypoint.prod.sh
+
+# copy, execute wait-for-it
+COPY ./wait-for-it.sh $APP_HOME/
+RUN chmod +x ./wait-for-it.sh
+
+# change user
+# RUN chown -R app:app celerybeat-schedule
+
+USER app
+
+# run entrypoint.sh
+ENTRYPOINT ["/home/app/web/entrypoint.prod.sh"]

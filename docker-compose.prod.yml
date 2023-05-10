@@ -1,0 +1,97 @@
+version: '3.7'
+
+services:
+  web:
+    container_name: boilerplate_web
+    restart: always
+    build:
+      context: ./app
+      dockerfile: Dockerfile.production
+    command: gunicorn config.wsgi:application --workers=3 --bind 0.0.0.0:8000
+    volumes:
+      - static_volume:/home/app/web/static_cdn
+      - media_volume:/home/app/web/media
+    expose:
+      - 8000
+    env_file:
+      - /var/lib/jenkins/env/utility/.env.prod
+    depends_on:
+      - db
+      - rabbit
+ 
+  db:
+    container_name: boilerplate_db
+    restart: always
+    image: postgres:13.0-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - /var/lib/jenkins/env/utility/.env.prod.db
+
+  nginx:
+    container_name: boilerplate_nginx
+    restart: always
+    build: ./nginx
+    volumes:
+      - static_volume:/home/app/web/static_cdn
+      - media_volume:/home/app/web/media
+    ports:
+      - 9000:80                       
+    depends_on:
+      - web
+
+  rabbit:
+    restart: always
+    container_name: boilerplate_rabbit
+    #image: rabbitmq:latest
+    image: "rabbitmq:3-management"
+    command: rabbitmq-server
+    hostname: rabbit_live
+    env_file:
+      - /var/lib/jenkins/env/utility/.env.prod
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - rabbit_data:/data
+
+  worker:
+    restart: always
+    container_name: hr_worker
+    build:
+      context: ./app
+      dockerfile: Dockerfile.production
+    command: "celery -A core worker -l INFO"
+    volumes:
+      - celery:/home/app/web/celery
+    links:
+      - rabbit
+    env_file:
+      - /var/lib/jenkins/env/utility/.env.prod
+    depends_on:
+      - web
+      - rabbit
+
+  celery-beat:
+    restart: always
+    container_name: boilerplate_celery_beat
+    build:
+        context: ./app
+        dockerfile: Dockerfile.production
+    command: celery -A core beat -l info
+    volumes:
+        - celery_beat_data:/home/app/web/celery 
+    links:
+        - rabbit
+    depends_on:
+        - rabbit
+    env_file:
+      - /var/lib/jenkins/env/utility/.env.prod
+  
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  rabbit_data:
+  celery:
+  celery_beat_data:

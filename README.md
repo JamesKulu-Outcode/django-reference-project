@@ -1,0 +1,15 @@
+- Soft delete
+- Activate Account
+- OAuth and OpenID Connect
+- Payment
+- Push Notification
+- Custom User Model
+- Groups and Permissions
+- Pagination / Filter / Sort / Search
+- Chat (SocketIO)
+- Docker (Done)
+- Swagger (Done)
+- Settings folder (Done)
+- sentry (Done)
+- logger (Done)
+- 
