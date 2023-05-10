@@ -23,6 +23,18 @@ services:
       - db_data:/var/lib/postgresql/data/
     env_file:
       - ./.env
+    
+  redis:
+    container_name: recon_redis
+    image: redis:alpine
+    restart: always
+    expose:
+      - 6379
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    entrypoint: redis-server --appendonly yes --port 6379
 
   rabbit:
     image: rabbitmq:latest
@@ -62,6 +74,7 @@ services:
 
 volumes:
   db_data:
+  redis_data: {}
   rabbit_data:
   worker_data:
   celery_beat_data:
