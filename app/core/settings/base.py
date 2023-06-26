@@ -31,6 +31,7 @@ BASE_APPS = [
 THIRD_PARTY_APPS = [
     'rest_framework',
     'drf_yasg',
+    'fcm_django',
 ]
 
 LOCAL_APPS = [
@@ -214,4 +215,8 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.redis.RedisCache',
         'LOCATION': 'redis://redis:6379',
     }
+}
+
+FCM_DJANGO_SETTINGS = {
+    "FCM_SERVER_KEY": "basdjbasdjbasjdbasjdkbasdqbw8dq7bdwbada8sbdy"
 }

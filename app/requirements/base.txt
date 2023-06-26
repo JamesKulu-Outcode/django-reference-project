@@ -24,3 +24,5 @@ sqlparse==0.4.4
 djangorestframework-simplejwt==5.2.2
 uritemplate==4.1.1
 urllib3==1.26.15
+pyfcm==1.4.9
+fcm-django
