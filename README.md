@@ -1,15 +1,13 @@
-- Soft delete
-- Activate Account
-- OAuth and OpenID Connect
-- Payment
+# Reference Project
+
+These are the functionality added in this reference project.
+
+- Abstract Model (Soft delete)
 - Push Notification
 - Custom User Model
-- Groups and Permissions
-- Pagination / Filter / Sort / Search
-- Chat (SocketIO)
-- Docker (Done)
-- Swagger (Done)
-- Settings folder (Done)
-- sentry (Done)
-- logger (Done)
-- 
+- Chat (Websocket)
+- Docker
+- Swagger
+- Sentry
+- Logger
+- Stripe Payment 

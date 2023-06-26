@@ -218,5 +218,5 @@ CACHES = {
 }
 
 FCM_DJANGO_SETTINGS = {
-    "FCM_SERVER_KEY": "basdjbasdjbasjdbasjdkbasdqbw8dq7bdwbada8sbdy"
+    "FCM_SERVER_KEY": config('FCM_KEY')
 }
